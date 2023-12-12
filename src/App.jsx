@@ -1,32 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
-  let [count, setCount] = useState(0); // state variable
+  let [todos, setTodos] = useState([]); // state variable
 
-  function handleclick() {
-    setCount(count + 1); // event handleing function
-  }
-
-  function handleminus() {
-    setCount(count - 1); // 2nd event handleing function
-  }
+  useEffect(() => {
+    fetch("http://localhost:3000/todos", {
+      method: "GET",
+    })
+      .then((resp) => resp.json())
+      .then((data) => {
+        console.log(data);
+        setTodos(data);
+      });
+  }, []);
 
   return (
     <>
-      <h1>Count Button(click to count)</h1>
-      <button onClick={handleclick}>click</button>
+      <h1>Todo List</h1>
+      Title
+      <input id="title" type="text" />
       <br />
-      {count}
       <br />
-      <button onClick={handleminus}>click -ve</button>
-      <PersonName count={count} />
-      {/* this is child component  with a prop inside to pass further  */}
+      Descrition
+      <input id="description" type="text" />
+      <br />
+      <button
+        onClick={() => {
+          let title = document.getElementById("title").value;
+          let description = document.getElementById("description").value;
+          fetch("http://localhost:3000/todos", {
+            method: "POST",
+            body: JSON.stringify({
+              title: title,
+              description: description,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+        }}
+      >
+        Submit
+      </button>
+      {todos.map((todo) => {
+        return (
+          <div key={todo.id}>
+            <span>{todo.title}</span>
+            <span>{todo.description}</span>
+            <button>Delete</button>
+          </div>
+        );
+      })}
+      <br />
     </>
   );
-}
-
-function PersonName(props) {
-  return <div>{props.count}</div>;
 }
 
 export default App;
